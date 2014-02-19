@@ -6,11 +6,11 @@
 # for more information and configuring and using Vagrant.
 
 Vagrant.configure("2") do |config|
-  config.vm.box = "opscode-ubuntu-12.04-chef-11.4.4"
-  config.vm.box_url = "https://opscode-vm-bento.s3.amazonaws.com/vagrant/opscode_ubuntu-12.04_chef-11.4.4.box"  
+  config.vm.box = "centos65-x86_64"
+  config.vm.box_url = "https://github.com/2creatives/vagrant-centos/releases/download/v6.5.1/centos65-x86_64-20131205.box"
   config.vm.provider "virtualbox" do |vb|
     vb.customize ["modifyvm", :id, "--memory", 1024]
   end
   config.vm.hostname = "shell-dev"
-  config.vm.synced_folder "c:/web", "/home/vagrant/"
+  config.vm.synced_folder "/home/chriss/web/", "/home/vagrant/"
 end
