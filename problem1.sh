@@ -1,4 +1,4 @@
-#!/bin/bash/
+#!/bin/bash
 
 #Set function to find files and directories
 FindExe (){
