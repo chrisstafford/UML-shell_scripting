@@ -1,5 +1,9 @@
 #!/bin/bash
-
+if  [ $# -eq 0 ]
+  then
+    echo 'Please enter at least one paramaeter'
+    exit
+fi
 if [ $1 == "-a" ]
   then
     echo 'Printing all occurences'
@@ -16,6 +20,11 @@ if [ $1 == "-a" ]
                   let "found += 1"
               fi
           done
+          if [ -s "$file" ] || [ -d "$file" ]
+            then
+              echo "$file"
+              let "found += 1"
+          fi
           if [ $found == 0 ]
             then
               echo "$file NOT FOUND" >&2
@@ -24,21 +33,43 @@ if [ $1 == "-a" ]
     done
   else
     echo 'Printing first occurence'
+    found=()
+    nfound=()
+    notfound=0
     for file in $@
     do
+      stopbit=0
       for DIR in `echo $PATH | sed -e 's/^:/.:/' -e 's/::/:.:/' -e 's/:$/:./' -e 's/:/ /g'`
         do
-          if [ -s "$DIR/$file" ] || [ -d "$DIR/$file" ]
+          if [ $stopbit -lt 1 ]
             then
-              echo "$DIR/$file"
-              exit
-            else
-              notfound=1
+            if [ -s "$file" ] || [ -d "$file" ]
+              then
+                found=("${found[@]}" "$file")
+                let "stopbit += 1"
+              else
+                let "notfound += 1"
+            fi
+              if [ -s "$DIR/$file" ] || [ -d "$DIR/$file" ]
+                then
+                  found=("${found[@]}" "$DIR/$file")
+                  let "stopbit += 1"
+                else
+                  let "notfound += 1"
+              fi
           fi
-      done
-      if [ $notfound -gt 0 ]
-        then
-          echo "$file NOT FOUND"
-      fi
+        done
+        if [ $notfound -gt `expr $# + 1` ]
+          then
+            nfound=("${nfound[@]}" "$file")
+        fi
     done
+    for line in ${found[@]}
+      do
+        echo "$line"
+      done
+    for line in ${nfound[@]}
+      do
+        echo "$line NOT FOUND"
+      done
 fi
