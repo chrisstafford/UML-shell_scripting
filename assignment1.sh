@@ -39,27 +39,27 @@ if [ $1 == "-a" ]
     for file in $@
     do
       stopbit=0
+      let "notfound += 1"
       for DIR in `echo $PATH | sed -e 's/^:/.:/' -e 's/::/:.:/' -e 's/:$/:./' -e 's/:/ /g'`
         do
           if [ $stopbit -lt 1 ]
             then
-            if [ -s "$file" ] || [ -d "$file" ]
-              then
-                found=("${found[@]}" "$file")
-                let "stopbit += 1"
-              else
-                let "notfound += 1"
-            fi
-              if [ -s "$DIR/$file" ] || [ -d "$DIR/$file" ]
-                then
-                  found=("${found[@]}" "$DIR/$file")
-                  let "stopbit += 1"
-                else
-                  let "notfound += 1"
-              fi
+            
+	            if [ -s "$file" ] || [ -d "$file" ]
+	              then
+	                found=("${found[@]}" "$file")
+	                let "stopbit += 1"
+	                let "notfound -= 1"
+	            fi
+	            if [ -s "$DIR/$file" ] || [ -d "$DIR/$file" ]
+	              then
+	                found=("${found[@]}" "$DIR/$file")
+	                let "stopbit += 1"
+	                let "notfound -= 1"
+	            fi
           fi
         done
-        if [ $notfound -gt `expr $# + 1` ]
+        if [ $notfound -eq 1 ]
           then
             nfound=("${nfound[@]}" "$file")
         fi
