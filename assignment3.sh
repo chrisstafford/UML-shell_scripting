@@ -59,9 +59,11 @@ my_rename()
 		  	echo "$newName exists."
 		  	let "err += 1"
 	  fi
-	  if [ $err -eq 0 ]
+	  if [ "$err" -eq 0 ]
 	  	then
 	  	return 0
+	  else
+	  	return 1
 	  fi
 
 	# the student must implement this function to my_rename
@@ -81,6 +83,18 @@ fix_dirs ()
 		newName=${CDIR// /-}
 		if my_rename "$1"
 			then
+				IFS=$'\n'
+				for d in $(find "$CDIR" -type d)
+				do
+					CHECKSUB=("$d")
+					CSUB="${CHECKSUB[@]}"
+					SNAME=${CSUB##*/}
+					newSName=$(dirname $CSUB)/${SNAME// /-}
+					if [ "$CSUB" != "$CDIR" ]
+						then
+						mv "$CSUB" $"$newSName"
+				fi
+				done
 				mv "$CDIR" "$newName"
 		fi
 
@@ -94,12 +108,19 @@ fix_dirs ()
 
 fix_files ()
 	{
-		my_rename
-
-		if [ "$err" -eq 0 ]
+		if my_rename "$1"
 			then
-				newName=${$1// /-}
-				mv $1 $newName
+			IFS=$'\n'
+			CHECKDIR=("$1")
+			CDIR="${CHECKDIR[@]}"
+			for f in $(find "$CDIR" -type f)
+			do
+				CHECKFIL=("$f")
+				CFIL="${CHECKFIL[@]}"
+				FNAME="${CFIL##*/}"
+				newFName=$(dirname ${CFIL})/${FNAME// /-}
+				mv "$CFIL" "$newFName"
+			done
 		fi
 	# The student must implement this function
 	# to actually call the my_rename funtion to 
@@ -163,10 +184,10 @@ fi
 
 # - if the directory specified is . or .. the script should print
 #   an error message and exit
-
-if [ "$2" = . ] || [ "$2" = .. ]
+_last=$BASH_ARGV
+if [ "$_last" = . ] || [ "$_last" = .. ]
 	then
-		echo "Cannot rename $2."
+		echo "Cannot rename $_last."
 		exit
 fi
 
@@ -174,10 +195,19 @@ fi
 #   message and exit
 #
 
-if [ "$SWITCH" != "-d" ] # || [ $1 != "-f" ]
+if [ "$SWITCH" != "-d" ] 
 then
-		echo "Please pass -d or -f as the first argument."
-		exit
+		let "PASS +=1"
+fi
+if [ "$SWITCH" != "-f" ]
+then
+	let "PASS += 1"
+fi
+
+if [ "$PASS" -lt 1 ]
+then
+	echo "Please pass -d or -f."
+	exit 1
 fi
 
 if [ "$WDIR" -a "$WFILE" ]
