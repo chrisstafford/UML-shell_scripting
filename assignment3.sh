@@ -194,12 +194,13 @@ fi
 # - if both -f and -d are not specified, the script should print a
 #   message and exit
 #
-
-if [ "$SWITCH" != "-d" ] 
+echo $SWITCH
+PASS=0
+if [ "$SWITCH" == "-d" ] 
 then
 		let "PASS +=1"
 fi
-if [ "$SWITCH" != "-f" ]
+if [ "$SWITCH" == "-f" ]
 then
 	let "PASS += 1"
 fi
