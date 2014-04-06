@@ -1,30 +1,30 @@
 #!/bin/bash
-#Student: David Maison
-#Assignment: 4
-#Write a shell script to send a customized mail message to the users listed on the command line by login (user) name, only if they are currently logged on.
 
-#catch error message
 if [ -z "$1" ]
   then
-    echo "ERROR: You must enter at least one recipient to use execute this script."  >&2 #error message 
+    echo "Please pass at least one user."  >&2 #error message 
     exit
 fi
 
-#loop through entire list of recipients
 for Recipient in $@
 do
 
-#create custom message for each recipient
+Me=$(cat /etc/passwd | grep $USER | awk -F ":" '{print $5}' | cut -d ',' -f 1)
+Them=$(cat /etc/passwd | grep $Recipient  |  awk -F ":" '{print $5}' | cut -d ',' -f 1)
+
 Subject="Mail Subject"
 
-Message="Hello $Recipient,
-\n\n****** This email is automatically generatated by `whoami`  ******
-\n\nMy instructor requires that I send this message as part of an assignment for class 92.312. The current time and date is `date`.
-\n\nHave a nice day.
-\n\n`whoami`"
+Message="Hello $Them,
+****** This email is automatically generatated by `whoami`  ******
+My instructor requires that I send this message as part of an assignment for class 92.312. The current time and date is `date`.
+Have a nice day.
+$Me"
 
-if [ $(who | grep $Recipient) != 0 ]
+User=$(who | grep $Recipient | head -n 1 | cut -d ' ' -f 1)
+
+if [ "$Recipient" = "$User" ]
 then
-  mail -s "$Subject" "$Recipient" < $Message
+  echo "$Message" | mail -s "$Subject" "$Recipient"
   echo "Message Sent"
+fi
 done
